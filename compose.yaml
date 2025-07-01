@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - '3306:3306'
+  redis:
+    image: 'redis:latest'
+    ports:
+      - '6379:6379'
+  permify:
+    image: permify/permify:latest
+    ports:
+      - "3476:3476"
+      - "3478:3478"
+    environment:
+      PERMIFY_DATABASE_DSN: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}"
+    depends_on:
+      - mysql

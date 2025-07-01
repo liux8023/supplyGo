@@ -1,0 +1,80 @@
+server:
+  port: 8080
+  error:
+    include-stacktrace: never            # 错误响应不包含异常堆栈，防止敏感信息泄露给前端
+    whitelabel:
+      enabled: false                     # 关闭Spring Boot默认的白标错误页面，避免直接显示错误页面
+    include-message: never               # 错误响应不包含异常消息，进一步保护信息安全
+    include-binding-errors: never        # 请求参数绑定错误不会在响应体中返回详细信息
+
+spring:
+  application:
+    name: supply-go
+  main:
+    web-application-type: reactive
+  security:
+    user:
+      name: admin
+      password: admin123
+    oauth2:
+      resource-server:
+        jwt:
+          secret-key: ${JWT_SECRET_KEY:my-super-secret-key-12345678901234567890}
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/${MYSQL_DATABASE:supply_go}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:123456}
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+#用swagger-ui替换首页
+springdoc:
+  use-fqn: true
+  swagger-ui:
+    path: /
+
+# JWT 自定义配置
+jwt:
+  # 24 hours
+  expiration-in-hours: 24
+
+# 日志配置
+logging:
+  level:
+    org.zalando.logbook: TRACE
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.http: DEBUG
+
+logbook:
+  obfuscate:
+    headers: 
+      - authorization
+      - cookie
+    parameters:
+      - password
+      - access_token
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        # 暴露所有端点给 admin server
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

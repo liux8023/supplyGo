@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.supplygo.modules.system.mapper.SysUserMapper">
+
+    <resultMap id="BaseResultMap" type="io.github.supplygo.modules.system.entity.SysUser">
+        <id column="id" property="id" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="code" property="code" />
+        <result column="account" property="account" />
+        <result column="password" property="password" />
+        <result column="name" property="name" />
+        <result column="real_name" property="realName" />
+        <result column="avatar" property="avatar" />
+        <result column="email" property="email" />
+        <result column="phone" property="phone" />
+        <result column="birthday" property="birthday" />
+        <result column="sex" property="sex" />
+        <result column="role_id" property="roleId" />
+        <result column="dept_id" property="deptId" />
+        <result column="post_id" property="postId" />
+        <result column="create_user" property="createUser" />
+        <result column="create_dept" property="createDept" />
+        <result column="update_user" property="updateUser" />
+        <result column="status" property="status" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, tenant_id, code, account, password, name, real_name, avatar, email, phone,
+        birthday, sex, role_id, dept_id, post_id, create_user, create_dept,
+        update_user, status, is_deleted
+    </sql>
+
+    <select id="selectUserPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user
+        <where>
+            is_deleted = 0
+            <if test="query.account != null and query.account != ''">
+                AND account LIKE CONCAT('%', #{query.account}, '%')
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.realName != null and query.realName != ''">
+                AND real_name LIKE CONCAT('%', #{query.realName}, '%')
+            </if>
+            <if test="query.email != null and query.email != ''">
+                AND email LIKE CONCAT('%', #{query.email}, '%')
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                AND phone LIKE CONCAT('%', #{query.phone}, '%')
+            </if>
+            <if test="query.sex != null">
+                AND sex = #{query.sex}
+            </if>
+            <if test="query.deptId != null">
+                AND dept_id = #{query.deptId}
+            </if>
+            <if test="query.postId != null">
+                AND post_id = #{query.postId}
+            </if>
+            <if test="query.status != null">
+                AND status = #{query.status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByAccount" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user
+        WHERE account = #{account} AND is_deleted = 0
+    </select>
+
+    <select id="selectUserDetail" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user
+        WHERE id = #{userId} AND is_deleted = 0
+    </select>
+
+    <select id="selectByDeptId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user
+        WHERE dept_id = #{deptId} AND is_deleted = 0
+    </select>
+
+    <select id="selectByRoleId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user u
+        INNER JOIN sys_user_role ur ON u.id = ur.user_id
+        WHERE ur.role_id = #{roleId} AND u.is_deleted = 0
+    </select>
+
+    <select id="selectByPostId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user
+        WHERE post_id = #{postId} AND is_deleted = 0
+    </select>
+
+    <select id="selectUsersByDataScope" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM sys_user
+        <where>
+            is_deleted = 0
+            <if test="deptIds != null and deptIds.size() > 0">
+                AND dept_id IN
+                <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
+                    #{deptId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectDeptIdByUserId" resultType="java.lang.Long">
+        SELECT dept_id
+        FROM sys_user
+        WHERE id = #{userId} AND is_deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询当前部门及以下部门ID -->
+    <select id="selectDeptAndSubDeptIdsByUserId" resultType="java.lang.Long">
+        WITH RECURSIVE dept_tree AS (
+            SELECT d.id
+            FROM sys_dept d
+            INNER JOIN sys_user u ON d.id = u.dept_id
+            WHERE u.id = #{userId} AND u.is_deleted = 0 AND d.is_deleted = 0
+            
+            UNION ALL
+            
+            SELECT d.id
+            FROM sys_dept d
+            INNER JOIN dept_tree dt ON d.parent_id = dt.id
+            WHERE d.is_deleted = 0
+        )
+        SELECT id FROM dept_tree
+    </select>
+
+    <!-- 根据角色ID列表查询数据权限配置 -->
+    <select id="selectDataScopesByRoleIds" resultType="java.lang.Integer">
+        SELECT DISTINCT r.data_scope
+        FROM sys_role r
+        WHERE r.id IN
+        <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+        AND r.is_deleted = 0
+        AND r.status = 1
+    </select>
+
+    <!-- 查询所有部门ID -->
+    <select id="selectAllDeptIds" resultType="java.lang.Long">
+        SELECT id
+        FROM sys_dept
+        WHERE is_deleted = 0
+    </select>
+
+    <!-- 根据角色ID列表查询自定义部门ID -->
+    <select id="selectCustomDeptIdsByRoleIds" resultType="java.lang.Long">
+        SELECT DISTINCT rd.dept_id
+        FROM sys_role_dept rd
+        WHERE rd.role_id IN
+        <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+    </select>
+
+    <!-- 根据用户ID查询角色ID列表 -->
+    <select id="selectRoleIdsByUserId" resultType="java.lang.Long">
+        SELECT ur.role_id
+        FROM sys_user_role ur
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <!-- 根据用户ID查询部门ID列表（用于数据权限） -->
+    <select id="selectDeptIdsByUserId" resultType="java.lang.Long">
+        SELECT DISTINCT u.dept_id
+        FROM sys_user u
+        WHERE u.id = #{userId} AND u.is_deleted = 0
+        AND u.dept_id IS NOT NULL
+    </select>
+
+</mapper> 

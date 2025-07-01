@@ -1,0 +1,30 @@
+= My API Documentation
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+[[overview]]
+== Overview
+
+Welcome to the API documentation.
+
+[[test-controller]]
+== Test Controller
+
+This section describes the endpoints available in the Test Controller.
+
+=== Hello Endpoint
+
+A simple endpoint that returns a welcome message.
+
+.Request
+include::{snippets}/test-hello/http-request.adoc[]
+
+.Response
+include::{snippets}/test-hello/http-response.adoc[]
+
+.Response Fields
+include::{snippets}/test-hello/response-fields.adoc[] 
