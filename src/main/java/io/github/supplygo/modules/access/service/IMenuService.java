@@ -1,6 +1,5 @@
 package io.github.supplygo.modules.access.service;
 
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
 import io.github.supplygo.modules.access.bo.MenuBO;
 import io.github.supplygo.modules.access.co.MenuCO;

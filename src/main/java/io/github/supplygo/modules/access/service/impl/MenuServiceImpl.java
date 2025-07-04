@@ -1,6 +1,5 @@
 package io.github.supplygo.modules.access.service.impl;
 
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import io.github.supplygo.common.Status;

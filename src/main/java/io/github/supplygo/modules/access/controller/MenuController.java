@@ -1,6 +1,5 @@
 package io.github.supplygo.modules.access.controller;
 
-import com.mybatisflex.core.paginate.Page;
 import io.github.supplygo.common.R;
 import io.github.supplygo.modules.access.assembly.MenuAssembly;
 import io.github.supplygo.modules.access.co.MenuCO;
