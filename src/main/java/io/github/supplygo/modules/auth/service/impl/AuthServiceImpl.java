@@ -2,11 +2,11 @@ package io.github.supplygo.modules.auth.service.impl;
 
 import io.github.supplygo.common.Status;
 import io.github.supplygo.exception.ServiceException;
+import io.github.supplygo.modules.access.mapper.UserMapper;
 import io.github.supplygo.modules.auth.co.AuthCO;
 import io.github.supplygo.modules.auth.ro.AuthRO;
 import io.github.supplygo.modules.auth.service.IAuthService;
 import io.github.supplygo.modules.auth.service.JwtService;
-import io.github.supplygo.modules.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
-    private final SysUserMapper userMapper;
+    private final UserMapper userMapper;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 

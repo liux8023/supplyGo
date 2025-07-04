@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.supplygo.modules.access.mapper.MenuMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="io.github.supplygo.modules.access.entity.Menu">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="component" property="component" jdbcType="VARCHAR"/>
+        <result column="permission" property="permission" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="icon" property="icon" jdbcType="VARCHAR"/>
+        <result column="sort" property="sort" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="create_user" property="createUser" jdbcType="BIGINT"/>
+        <result column="update_user" property="updateUser" jdbcType="BIGINT"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 根据角色ID查询菜单列表 -->
+    <select id="selectMenusByRoleId" resultMap="BaseResultMap">
+        SELECT m.* FROM menu m
+        INNER JOIN role_menu rm ON m.id = rm.menu_id
+        WHERE rm.role_id = #{roleId}
+        AND m.status = 1 AND m.is_deleted = 0
+        ORDER BY m.sort ASC
+    </select>
+
+    <!-- 根据用户ID查询菜单列表 -->
+    <select id="selectMenusByUserId" resultMap="BaseResultMap">
+        SELECT DISTINCT m.* FROM menu m
+        INNER JOIN role_menu rm ON m.id = rm.menu_id
+        INNER JOIN user_role ur ON rm.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+        AND m.status = 1 AND m.is_deleted = 0
+        ORDER BY m.sort ASC
+    </select>
+
+    <!-- 根据父级ID查询子菜单 -->
+    <select id="selectMenusByParentId" resultMap="BaseResultMap">
+        SELECT * FROM menu
+        WHERE parent_id = #{parentId}
+        AND is_deleted = 0
+        ORDER BY sort ASC
+    </select>
+
+</mapper> 

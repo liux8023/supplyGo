@@ -1,8 +1,8 @@
 package io.github.supplygo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.supplygo.common.R;
 import io.github.supplygo.common.Status;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

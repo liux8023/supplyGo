@@ -1,6 +1,6 @@
 package io.github.supplygo.modules.auth.service;
 
-import io.github.supplygo.modules.system.entity.SysUser;
+import io.github.supplygo.modules.access.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ public class JwtService {
     }
 
 
-    public String generateToken(SysUser user) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         // 您可以在这里添加自定义的声明
         claims.put("userId", user.getId());

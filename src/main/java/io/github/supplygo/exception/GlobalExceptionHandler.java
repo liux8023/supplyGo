@@ -53,8 +53,6 @@ public class GlobalExceptionHandler {
 
     /**
      * 未知错误还是自己处理吧，别抛给前端
-     *
-     *
      */
     @ExceptionHandler(Throwable.class)
     public Mono<ResponseEntity<R<?>>> handleOtherException(Throwable ex) {
@@ -65,7 +63,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateKeyException.class)
     public R<?> handleDuplicateKey(DuplicateKeyException ex) {
-        log.error("主键冲突：{}", ex.getMessage(), ex);
+        log.warn("主键冲突：{}", ex.getMessage(), ex);
         return R.fail(Status.DUPLICATE_PRIMARY_KEY);
     }
 

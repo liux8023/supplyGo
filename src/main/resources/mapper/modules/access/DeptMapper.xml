@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.supplygo.modules.access.mapper.DeptMapper">
+
+    <resultMap id="DeptResultMap" type="io.github.supplygo.modules.access.entity.Dept">
+        <id column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="sort" property="sort"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <!-- 分页查询部门列表 -->
+    <select id="selectDeptPage" resultMap="DeptResultMap">
+        SELECT id, parent_id, code, name, sort, create_user, update_user, status, is_deleted
+        FROM sys_dept
+        WHERE is_deleted = 0
+        <if test="query.code != null and query.code != ''">
+            AND code LIKE CONCAT('%', #{query.code}, '%')
+        </if>
+        <if test="query.name != null and query.name != ''">
+            AND name LIKE CONCAT('%', #{query.name}, '%')
+        </if>
+        <if test="query.parentId != null">
+            AND parent_id = #{query.parentId}
+        </if>
+        <if test="query.status != null">
+            AND status = #{query.status}
+        </if>
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <!-- 根据父级ID查询子部门列表 -->
+    <select id="selectByParentId" resultMap="DeptResultMap">
+        SELECT id, parent_id, code, name, sort, create_user, update_user, status, is_deleted
+        FROM dept
+        WHERE is_deleted = 0
+        AND parent_id = #{parentId}
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 查询部门树结构 -->
+    <select id="selectDeptTree" resultMap="DeptResultMap">
+        WITH RECURSIVE dept_tree AS (
+            SELECT id, parent_id, code, name, sort, create_user, update_user, status, is_deleted, 0 as level
+            FROM sys_dept
+            WHERE is_deleted = 0
+            <if test="parentId != null">
+                AND parent_id = #{parentId}
+            </if>
+            <if test="parentId == null">
+                AND parent_id IS NULL
+            </if>
+            
+            UNION ALL
+            
+            SELECT d.id, d.parent_id, d.code, d.name, d.sort, d.create_user, d.update_user, d.status, d.is_deleted, dt.level + 1
+            FROM sys_dept d
+            INNER JOIN dept_tree dt ON d.parent_id = dt.id
+            WHERE d.is_deleted = 0
+        )
+        SELECT * FROM dept_tree
+        ORDER BY level, sort ASC
+    </select>
+
+    <!-- 根据编号查询部门 -->
+    <select id="selectByCode" resultMap="DeptResultMap">
+        SELECT id, parent_id, code, name, sort, create_user, update_user, status, is_deleted
+        FROM dept
+        WHERE is_deleted = 0
+        AND code = #{code}
+    </select>
+
+    <!-- 查询部门及其子部门ID列表 -->
+    <select id="selectDeptAndSubDeptIds" resultType="java.lang.Long">
+        WITH RECURSIVE dept_tree AS (
+            SELECT id
+            FROM dept
+            WHERE is_deleted = 0
+            AND id = #{deptId}
+            
+            UNION ALL
+            
+            SELECT d.id
+            FROM dept d
+            INNER JOIN dept_tree dt ON d.parent_id = dt.id
+            WHERE d.is_deleted = 0
+        )
+        SELECT id FROM dept_tree
+    </select>
+
+    <!-- 根据用户ID查询所属部门 -->
+    <select id="selectDeptByUserId" resultMap="DeptResultMap">
+        SELECT d.id, d.parent_id, d.code, d.name, d.sort, d.create_user, d.update_user, d.status, d.is_deleted
+        FROM dept d
+        INNER JOIN user u ON d.id = u.dept_id
+        WHERE d.is_deleted = 0
+        AND u.is_deleted = 0
+        AND u.id = #{userId}
+    </select>
+
+    <!-- 查询根部门列表 -->
+    <select id="selectRootDepts" resultMap="DeptResultMap">
+        SELECT id, parent_id, code, name, sort, create_user, update_user, status, is_deleted
+        FROM dept
+        WHERE is_deleted = 0
+        AND parent_id IS NULL
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 检查部门下是否有用户 -->
+    <select id="countUsersByDeptId" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM user
+        WHERE is_deleted = 0
+        AND dept_id = #{deptId}
+    </select>
+
+    <!-- 检查部门下是否有子部门 -->
+    <select id="countSubDeptsByDeptId" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM dept
+        WHERE is_deleted = 0
+        AND parent_id = #{deptId}
+    </select>
+
+</mapper> 
